@@ -1,3 +1,4 @@
+#include <string.h>
 #include <pebble.h>
 
 #define KEY_LOCA 0
@@ -10,12 +11,8 @@ static TextLayer *s_output_layer;
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
-
-  static char locaString[20];
-  static char descString[64];
-  static char tempString[2];
   
-  static char bigString[255];
+  char bigString[64];
   
   // Process all pairs present
   while (t != NULL) {
@@ -25,18 +22,17 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Process this pair's key
     switch (t->key) {
       case KEY_LOCA:
-        snprintf(bigString, sizeof(bigString), "'%s'\n", t->value->cstring);
-        APP_LOG(APP_LOG_LEVEL_ERROR, t->value->cstring);
-        //text_layer_set_text(s_output_layer, s_buffer);
+        //snprintf(bigString, sizeof(bigString), "'%s'\n", t->value->cstring);
+        strcpy(bigString, t->value->cstring);
+        strcat(bigString, "\n");
         break;
       case KEY_DESC:
-        snprintf(bigString, sizeof(bigString), "'%s'\n", t->value->cstring);
-        APP_LOG(APP_LOG_LEVEL_ERROR, t->value->cstring);
-        //text_layer_set_text(s_output_layer, s_buffer);
+        //snprintf(bigString, sizeof(bigString), "'%s'\n", t->value->cstring);
+        strcat(bigString, t->value->cstring);
+        strcat(bigString, "\n");
         break;
       case KEY_TEMP:
-        snprintf(bigString, sizeof(bigString), "'%s'", t->value->cstring);
-        APP_LOG(APP_LOG_LEVEL_ERROR, t->value->cstring);
+        strcat(bigString, t->value->cstring);
         break;
     }
     
@@ -44,6 +40,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     t = dict_read_next(iterator);
   }
   
+  //printing the string (doesnt print for some reason)
+  APP_LOG(APP_LOG_LEVEL_ERROR, bigString);
   text_layer_set_text(s_output_layer, bigString);
 }
 
@@ -66,8 +64,8 @@ static void main_window_load(Window *window) {
   // Create output TextLayer
   s_output_layer = text_layer_create(GRect(0, 0, window_bounds.size.w, window_bounds.size.h));
   text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
-  text_layer_set_text_color(s_output_layer, GColorWhite);
-  text_layer_set_background_color(s_output_layer, GColorBlack);
+  //text_layer_set_text_color(s_output_layer, GColorWhite);
+  //text_layer_set_background_color(s_output_layer, GColorBlack);
   text_layer_set_text(s_output_layer, "Loading Data...");
   text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_layer, text_layer_get_layer(s_output_layer));

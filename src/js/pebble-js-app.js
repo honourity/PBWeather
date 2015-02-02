@@ -19,10 +19,14 @@ function sendWeatherData() {
           var description = json.weather[0].description;
           var location    = json.name + ', ' + json.sys.country;
           
+          console.log(location);
+          console.log(description);
+          console.log(temperature);
+          
           Pebble.sendAppMessage({
             'KEY_LOCA':location,
             'KEY_DESC':description,
-            'KEY_TEMP':temperature
+            'KEY_TEMP':temperature.toString()
           });
           console.log("Weather data sent!");
         }
