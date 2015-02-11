@@ -5,7 +5,7 @@
         "KEY_TEMP": 2
     },
     "capabilities": [
-        ""
+        "location"
     ],
     "companyName": "thomas.la.brown@gmail.com",
     "longName": "Weather",
