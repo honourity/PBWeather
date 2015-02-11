@@ -1,51 +1,49 @@
-#include <string.h>
 #include <pebble.h>
 
 #define KEY_LOCA 0
 #define KEY_DESC 1
 #define KEY_TEMP 2
 
-static Window *s_main_window;
-static TextLayer *s_output_layer;
+static Window    *s_main_window;
+static TextLayer *headingLayer;
+static TextLayer *middleLayer;
+static TextLayer *bottomLayer;
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  // Get the first pair
   Tuple *t = dict_read_first(iterator);
   
-  char bigString[64];
+  char *KEY_LOCA_String = t->value->cstring;
+  char *KEY_DESC_String = t->value->cstring;
+  char *KEY_TEMP_String = t->value->cstring;
   
-  // Process all pairs present
-  while (t != NULL) {
-    // Long lived buffer
-    
-    
-    // Process this pair's key
-    switch (t->key) {
+  while (t != NULL)
+  {
+    switch (t->key)
+    {
       case KEY_LOCA:
-        //snprintf(bigString, sizeof(bigString), "'%s'\n", t->value->cstring);
-        strcpy(bigString, t->value->cstring);
-        strcat(bigString, "\n");
+        KEY_LOCA_String = t->value->cstring;
         break;
       case KEY_DESC:
-        //snprintf(bigString, sizeof(bigString), "'%s'\n", t->value->cstring);
-        strcat(bigString, t->value->cstring);
-        strcat(bigString, "\n");
+        KEY_DESC_String = t->value->cstring;
         break;
       case KEY_TEMP:
-        strcat(bigString, t->value->cstring);
+        KEY_TEMP_String = t->value->cstring;
         break;
     }
-    
-    // Get next pair, if any
     t = dict_read_next(iterator);
   }
   
-  //printing the string (doesnt print for some reason)
-  APP_LOG(APP_LOG_LEVEL_ERROR, bigString);
-  text_layer_set_text(s_output_layer, bigString);
+  //capitalising first letter of location and description
+  if (KEY_LOCA_String[0] >= 97) KEY_LOCA_String[0] = KEY_LOCA_String[0] - 32;
+  if (KEY_DESC_String[0] >= 97) KEY_DESC_String[0] = KEY_DESC_String[0] - 32;
+  
+  text_layer_set_text(headingLayer, KEY_LOCA_String);
+  text_layer_set_text(middleLayer,  KEY_DESC_String);
+  text_layer_set_text(bottomLayer,  KEY_TEMP_String);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  text_layer_set_text(headingLayer, "Receive Failed!");
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
 }
 
@@ -61,19 +59,40 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect window_bounds = layer_get_bounds(window_layer);
 
-  // Create output TextLayer
-  s_output_layer = text_layer_create(GRect(0, 0, window_bounds.size.w, window_bounds.size.h));
-  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
-  //text_layer_set_text_color(s_output_layer, GColorWhite);
-  //text_layer_set_background_color(s_output_layer, GColorBlack);
-  text_layer_set_text(s_output_layer, "Loading Data...");
-  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
-  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));
+  //should add to 152
+  int headingLayerHeight = 28;
+  int middleLayerHeight  = 72;
+  int bottomLayerHeight  = 52;
+  
+  headingLayer = text_layer_create(GRect(10, 0, window_bounds.size.w-10, headingLayerHeight));
+  text_layer_set_font(headingLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  //text_layer_set_text_color(headingLayer, GColorWhite);
+  //text_layer_set_background_color(headingLayer, GColorBlack);
+  text_layer_set_text(headingLayer, "Loading Data...");
+  text_layer_set_overflow_mode(headingLayer, GTextOverflowModeFill);
+  layer_add_child(window_layer, text_layer_get_layer(headingLayer));
+  
+  middleLayer = text_layer_create(GRect(10, headingLayerHeight, window_bounds.size.w-10, middleLayerHeight));
+  text_layer_set_font(middleLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  //text_layer_set_text_color(middleLayer, GColorWhite);
+  //text_layer_set_background_color(middleLayer, GColorBlack);
+  text_layer_set_overflow_mode(middleLayer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(middleLayer));
+  
+  bottomLayer = text_layer_create(GRect(10, headingLayerHeight + middleLayerHeight, window_bounds.size.w-10, bottomLayerHeight));
+  text_layer_set_font(bottomLayer, fonts_get_system_font(FONT_KEY_BITHAM_42_MEDIUM_NUMBERS));
+  //text_layer_set_text_color(bottomLayer, GColorWhite);
+  //text_layer_set_background_color(bottomLayer, GColorBlack);
+  text_layer_set_overflow_mode(bottomLayer, GTextOverflowModeFill);
+  //text_layer_set_text_alignment(bottomLayer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(bottomLayer));
 }
 
 static void main_window_unload(Window *window) {
   // Destroy output TextLayer
-  text_layer_destroy(s_output_layer);
+  text_layer_destroy(headingLayer);
+  text_layer_destroy(middleLayer);
+  text_layer_destroy(bottomLayer);
 }
 
 static void init() {

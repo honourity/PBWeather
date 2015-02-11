@@ -1,32 +1,40 @@
-Pebble.addEventListener('ready', function(e) {
-  console.log('PebbleKit JS Ready!');
-  console.log('Sending data...');
-  sendWeatherData();
-});
+var locationOptions = {
+  enableHighAccuracy: true, 
+  maximumAge: 10000, 
+  timeout: 10000
+};
+function locationSuccess(pos) {
+  var locationMessage = 'lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude;
+  console.log(locationMessage);
+  sendWeatherData(locationMessage, true);
+}
+function locationError(err) {
+  var locationMessage = 'location error (' + err.code + '): ' + err.message;
+  console.log(locationMessage);
+  sendWeatherData(locationMessage, false);
+}
 
-function sendWeatherData() {
+function sendWeatherData(locationMessage, isActualLocation) {
+  var weatherDataUrl = 'http://api.openweathermap.org/data/2.5/weather?';
+  if (!isActualLocation) {
+    weatherDataUrl = weatherDataUrl.concat("q=Sydney,au");
+  } else {
+    weatherDataUrl = weatherDataUrl.concat(locationMessage);
+  }
+  
   var request = new XMLHttpRequest();
-  request.open('GET', 'http://api.openweathermap.org/data/2.5/weather?q=Sydney,au', true);
+  console.log(weatherDataUrl);
+  request.open('GET', weatherDataUrl, true);
   request.onload = function(e) {
     if (request.readyState == 4) {
       if(request.status == 200) {
         console.log(request.responseText);
         var response = JSON.parse(request.responseText);
         if (response) {
-          var json = response;
-          
-          var temperature = Math.round(json.main.temp - 273.15);
-          var description = json.weather[0].description;
-          var location    = json.name + ', ' + json.sys.country;
-          
-          console.log(location);
-          console.log(description);
-          console.log(temperature);
-          
           Pebble.sendAppMessage({
-            'KEY_LOCA':location,
-            'KEY_DESC':description,
-            'KEY_TEMP':temperature.toString()
+            'KEY_LOCA':response.name,
+            'KEY_DESC':response.weather[0].description.concat("\nHumidity: ",response.main.humidity,"%\nWind: ",response.wind.speed,"m/s"),
+            'KEY_TEMP':Math.round(response.main.temp - 273.15).toString()
           });
           console.log("Weather data sent!");
         }
@@ -39,3 +47,12 @@ function sendWeatherData() {
   };
   request.send(null);
 }
+
+Pebble.addEventListener('ready', function(e) {
+  console.log('PebbleKit JS Ready!');
+  console.log('Sending data...');
+  
+  navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+  
+  
+});
