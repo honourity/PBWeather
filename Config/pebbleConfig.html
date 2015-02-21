@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <title>Configure</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+function loadjscssfile(filename, filetype){
+    if (filetype=="js"){
+        var fileref=document.createElement('script')
+        fileref.setAttribute("type","text/javascript")
+        fileref.setAttribute("src", filename)
+    }
+    else if (filetype=="css"){
+        var fileref=document.createElement("link")
+        fileref.setAttribute("rel", "stylesheet")
+        fileref.setAttribute("type", "text/css")
+        fileref.setAttribute("href", filename)
+    }
+    if (typeof fileref!="undefined")
+        document.getElementsByTagName("head")[0].appendChild(fileref)
+}
+document.ready = function(e){ 
+   loadjscssfile("http://code.jquery.com/jquery-1.9.1.min.js", "js");
+   loadjscssfile("http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js", "js");
+   loadjscssfile("http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css", "css");
+   var obj = jQuery.parseJSON(decodeURIComponent(window.location.search.substring(1)));
+   for(key in obj) {
+      $("#"+[key]).val(obj[key]);
+      $("#"+[key]).val(obj[key]).slider("refresh");
+   }
+}
+</script>
+  </head>
+  <body>
+    <div data-role="page" id="main">
+      <div data-role="header" class="jqm-header">
+        <h1>Weather App Config</h1>
+      </div>
+      <div data-role="content">
+        <div data-role="fieldcontain">
+          <label for="special-feature">Use Fahrenheit:</label>
+          <select name="special-feature" id="special-feature" data-role="slider">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+        <div class="ui-body ui-body-b">
+          <fieldset class="ui-grid-a">
+              <div class="ui-block-a"><button type="submit" data-theme="d" id="b-cancel" onclick="btnCancelClick()">Cancel</button></div>
+              <div class="ui-block-b"><button type="submit" data-theme="a" id="b-submit" onclick="btnSubmitClick()">Submit</button></div>
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function btnCancelClick() {
+       console.log("Cancel");
+       document.location = "pebblejs://close";
+    }
+    function btnSubmitClick() {
+      console.log("Submit");
+      var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(saveOptions()));
+      console.log("Warping to: " + location);
+      console.log(location);
+      document.location = location;
+    }
+      function saveOptions() {
+        var options = {}
+        $('[type="radio"]').each(function(){options[$(this).attr('id')] = $(this).is(':checked');})
+        return options;
+      }
+
+function getRadioValue() {
+   var radios = document.getElementsByName('useFahrenheit');
+   for (var i = 0, length = radios.length; i < length; i++) {
+       if (radios[i].checked) {
+           return alert(radios[i].value);
+       }
+   }
+   return 'false';
+}
+
+      function saveOptions() {
+        var options = {}
+        //Add all textual values
+        $('textarea, select, [type="hidden"], [type="password"], [type="text"]').each(function(){options[$(this).attr('id')] = $(this).val();})
+        //Add all checkbox type values
+        $('[type="radio"], [type="checkbox"]').each(function(){options[$(this).attr('id')] = $(this).is(':checked');})
+        return options;
+      }
+      $().ready(function() {
+        $("#b-cancel").click(function() {
+          console.log("Cancel");
+          document.location = "pebblejs://close";
+        });
+        $("#b-submit").click(function() {
+          console.log("Submit");
+          var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(saveOptions()));
+          console.log("Warping to: " + location);
+          console.log(location);
+          document.location = location;
+        });
+        //Set form values to whatever is passed in.
+        var obj = jQuery.parseJSON(decodeURIComponent(window.location.search.substring(1)));
+        for(key in obj) {
+          $("#"+[key]).val(obj[key]);
+          $("#"+[key]).val(obj[key]).slider("refresh");       
+        }
+      });
+
+    </script>
+  </body>
+</html>
