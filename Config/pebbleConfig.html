@@ -11,12 +11,12 @@
   <body>
     <div data-role="page" id="main">
       <div data-role="header" class="jqm-header">
-        <h1>Weather App Config</h1>
+        <h1>Weather Config</h1>
       </div>
       <div data-role="content">
         <div data-role="fieldcontain">
-          <label for="special-feature">Use Fahrenheit:</label>
-          <select name="special-feature" id="special-feature" data-role="slider">
+          <label for="Fahrenheit">Use Fahrenheit:</label>
+          <select name="Fahrenheit" id="Fahrenheit" data-role="slider">
             <option value="false">No</option>
             <option value="true">Yes</option>
           </select>
@@ -33,7 +33,10 @@
     <script>
       function saveOptions() {
         var options = {}
-        $('[type="radio"]').each(function(){options[$(this).attr('id')] = $(this).is(':checked');})
+        //Add all textual values
+        $('textarea, select, [type="hidden"], [type="password"], [type="text"]').each(function(){options[$(this).attr('id')] = $(this).val();})
+        //Add all checkbox type values
+        $('[type="radio"], [type="checkbox"]').each(function(){options[$(this).attr('id')] = $(this).is(':checked');})
         return options;
       }
       $().ready(function() {
