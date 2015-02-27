@@ -2,7 +2,12 @@
 <head>
    <script>
       window.onload = function(e) {
-         document.body.innerHTML='<object width="100%" height="100%" type="text/html" data="http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfig.html"></object>';
+         var query = window.location.search.substring(1);
+         if (query != '')
+         {
+            query = '?' + query;
+         }
+         document.body.innerHTML='<object width="100%" height="100%" type="text/html" data="http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfig.html' + query + '"></object>';
       }
    </script>
 </head>
