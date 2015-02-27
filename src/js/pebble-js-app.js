@@ -1,5 +1,6 @@
 var initialized = false;
 var options = {'Fahrenheit':'false'};
+options.Fahrenheit = window.localStorage.getItem('Fahrenheit') ? window.localStorage.getItem('Fahrenheit') : 'false';
 
 function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
 {
@@ -13,7 +14,6 @@ function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
 
 function ConvertToReleventTemp(tempCelcius)
 {
-   //var options = JSON.parase(options);
    if (options.Fahrenheit == 'true')
    {
       return Math.round((tempCelcius*1.8)+32);
@@ -85,18 +85,33 @@ Pebble.addEventListener('ready', function(e) {
   initialized = true;
 });
 
+Pebble.addEventListener("appmessage",
+  function(e) {
+     var responseData = JSON.parse(e.response).KEY_UNIT;
+     if (responseData === 1)
+     {
+       options.Fahrenheit = 'true';
+     }
+     else
+     {
+       options.Fahrenheit = 'false';
+     }
+  }
+);
+
 Pebble.addEventListener("showConfiguration", function() {
   console.log("showing configuration");
   Pebble.openURL('http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfigPageLoader.html?'+encodeURIComponent(JSON.stringify(options)));
+   console.log("urioptions " + encodeURIComponent(JSON.stringify(options)));
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
   console.log("configuration closed");
-  // webview closed
-  //Using primitive JSON validity and non-empty check
   if (e.response.charAt(0) == "{" && e.response.slice(-1) == "}" && e.response.length > 5) {
-    options = JSON.parse(decodeURIComponent(e.response));
-    console.log("Options = " + JSON.stringify(options));
+    window.localStorage.setItem('Fahrenheit', JSON.parse(decodeURIComponent(e.response)).Fahrenheit);
+    options.Fahrenheit = window.localStorage.getItem('Fahrenheit') ? window.localStorage.getItem('Fahrenheit') : 'false';
+    
+    navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
   } else {
     console.log("Cancelled");
   }
