@@ -82,21 +82,21 @@ static void main_window_load(Window *window) {
   text_layer_set_overflow_mode(middleLayer, GTextOverflowModeWordWrap);
   layer_add_child(window_layer, text_layer_get_layer(middleLayer));
   
-  bottomLayer = text_layer_create(GRect(10, headingLayerHeight + middleLayerHeight+6, (window_bounds.size.w / 2), bottomLayerHeight));
-  text_layer_set_font(bottomLayer, fonts_get_system_font(FONT_KEY_BITHAM_42_MEDIUM_NUMBERS));
-  //text_layer_set_text_color(bottomLayer, GColorWhite);
-  //text_layer_set_background_color(bottomLayer, GColorBlack);
-  //text_layer_set_overflow_mode(bottomLayer, GTextOverflowModeFill);
-  text_layer_set_text_alignment(bottomLayer, GTextAlignmentLeft);
-  layer_add_child(window_layer, text_layer_get_layer(bottomLayer));
-  
-  bottomRightLayer = text_layer_create(GRect((window_bounds.size.w / 2), headingLayerHeight + middleLayerHeight+6, (window_bounds.size.w / 2)-10, bottomLayerHeight));
+  bottomRightLayer = text_layer_create(GRect(((window_bounds.size.w / 2)-70), headingLayerHeight + middleLayerHeight+6, (window_bounds.size.w / 2)+65, bottomLayerHeight));
   text_layer_set_font(bottomRightLayer, fonts_get_system_font(FONT_KEY_BITHAM_42_MEDIUM_NUMBERS));
   //text_layer_set_text_color(bottomRightLayer, GColorWhite);
-  //text_layer_set_background_color(bottomRightLayer, GColorBlack);
-  //text_layer_set_overflow_mode(bottomRightLayer, GTextOverflowModeFill);
+  //text_layer_set_background_color(bottomLayer, GColorClear);
+  text_layer_set_overflow_mode(bottomRightLayer, GTextOverflowModeFill);
   text_layer_set_text_alignment(bottomRightLayer, GTextAlignmentRight);
   layer_add_child(window_layer, text_layer_get_layer(bottomRightLayer));
+  
+  bottomLayer = text_layer_create(GRect(5, headingLayerHeight + middleLayerHeight+6, (window_bounds.size.w / 2), bottomLayerHeight));
+  text_layer_set_font(bottomLayer, fonts_get_system_font(FONT_KEY_BITHAM_42_MEDIUM_NUMBERS));
+  //text_layer_set_text_color(bottomLayer, GColorWhite);
+  //text_layer_set_background_color(bottomLayer, GColorClear);
+  text_layer_set_overflow_mode(bottomLayer, GTextOverflowModeFill);
+  text_layer_set_text_alignment(bottomLayer, GTextAlignmentLeft);
+  layer_add_child(window_layer, text_layer_get_layer(bottomLayer));
   
   bottomHeaderLayer = text_layer_create(GRect(10, headingLayerHeight + middleLayerHeight-2, (window_bounds.size.w / 2), 16));
   text_layer_set_font(bottomHeaderLayer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
@@ -139,6 +139,12 @@ static void init() {
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
+   
+  //todo - some notes for later
+   //add persistent data for degrees c and f
+   //add UP button trigger to swap between c and f (and save to persistence)
+   //add receive functionality to grab config from pebble phone app config data (and save to persistence)
+   //add app version control to persistence
 
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());

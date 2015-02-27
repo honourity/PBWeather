@@ -1,3 +1,6 @@
+var initialized = false;
+var options = {'Fahrenheit':'false'};
+
 function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
 {
    Pebble.sendAppMessage({
@@ -6,6 +9,19 @@ function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
       'KEY_TEMP': KEY_TEMP,
       'KEY_APPT': KEY_APPT
    });
+}
+
+function ConvertToReleventTemp(tempCelcius)
+{
+   //var options = JSON.parase(options);
+   if (options.Fahrenheit == 'true')
+   {
+      return Math.round((tempCelcius*1.8)+32);
+   }
+   else
+   {
+      return Math.round(tempCelcius);
+   }
 }
 
 function processWeatherDataSuccess(locationMessage)
@@ -21,11 +37,11 @@ function processWeatherDataSuccess(locationMessage)
         var response = JSON.parse(request.responseText);
         if (response) {
             var Name               = response.name;
-            var Temp               = Math.round(response.main.temp - 273.15);
+            var Temp               = ConvertToReleventTemp(response.main.temp - 273.15);
             var WindSpeed          = response.wind.speed;
             var Humidity           = response.main.humidity;
-            var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * Temp) / (237.7 + Temp));
-            var ApparentTemp       = Math.round(Temp + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4);
+            var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * (response.main.temp - 273.15)) / (237.7 + (response.main.temp - 273.15)));
+            var ApparentTemp       = ConvertToReleventTemp(((response.main.temp - 273.15) + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4));
             var Details            = response.weather[0].description.concat("\nHumidity: ",Humidity,"%\nWind: ",WindSpeed,"m/s");
             pushToPebble(Name.toString(), Details.toString(), Temp.toString(), ApparentTemp.toString());
             console.log("Weather data sent!");
@@ -66,4 +82,22 @@ Pebble.addEventListener('ready', function(e) {
   console.log('PebbleKit JS Ready!');
   console.log('Sending data...');
   navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+  initialized = true;
+});
+
+Pebble.addEventListener("showConfiguration", function() {
+  console.log("showing configuration");
+  Pebble.openURL('http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfigPageLoader.html?'+encodeURIComponent(JSON.stringify(options)));
+});
+
+Pebble.addEventListener("webviewclosed", function(e) {
+  console.log("configuration closed");
+  // webview closed
+  //Using primitive JSON validity and non-empty check
+  if (e.response.charAt(0) == "{" && e.response.slice(-1) == "}" && e.response.length > 5) {
+    options = JSON.parse(decodeURIComponent(e.response));
+    console.log("Options = " + JSON.stringify(options));
+  } else {
+    console.log("Cancelled");
+  }
 });
