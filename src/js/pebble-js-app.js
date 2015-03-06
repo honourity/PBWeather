@@ -27,18 +27,18 @@ function ConvertToReleventTemp(tempCelcius)
 
 function processYahooData(response)
 {
-   var kelvinTemp = response.main.temp * 255.928;
+   var celsiusTemp = (response.query.results.channel.item.condition.temp - 32) * 5 / 9;
    var windMps = (response.query.results.channel.wind.speed * 1609.344) / 3600;
-   var textDescription = response.query.results.channel.item.text;
+   var textDescription = response.query.results.channel.item.condition.text;
    var Name = response.query.results.channel.location.city;
    var humidityMeasurement = response.query.results.channel.atmosphere.humidity;
 
-   var Temp               = ConvertToReleventTemp(kelvinTemp - 273.15);
+   var Temp               = ConvertToReleventTemp(celsiusTemp);
    var WindSpeed          = windMps;
    var Humidity           = humidityMeasurement;
-   var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * (kelvinTemp - 273.15)) / (237.7 + (kelvinTemp - 273.15)));
-   var ApparentTemp       = ConvertToReleventTemp(((kelvinTemp - 273.15) + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4));
-   var Details            = textDescription.concat("\nHumidity: ",Humidity,"%\nWind: ",WindSpeed,"m/s");
+   var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * (celsiusTemp)) / (237.7 + (celsiusTemp)));
+   var ApparentTemp       = ConvertToReleventTemp(((celsiusTemp) + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4));
+   var Details            = textDescription.concat("\nHumidity: ",Humidity,"%\nWind: ",Math.round(WindSpeed*100)/100,"m/s");
    
    pushToPebble(Name.toString(), Details.toString(), Temp.toString(), ApparentTemp.toString());
 }
@@ -50,7 +50,7 @@ function processOpenWeatherData(response)
    var Humidity           = response.main.humidity;
    var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * (response.main.temp - 273.15)) / (237.7 + (response.main.temp - 273.15)));
    var ApparentTemp       = ConvertToReleventTemp(((response.main.temp - 273.15) + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4));
-   var Details            = response.weather[0].description.concat("\nHumidity: ",Humidity,"%\nWind: ",WindSpeed,"m/s");
+   var Details            = response.weather[0].description.concat("\nHumidity: ",Humidity,"%\nWind: ",Math.round(WindSpeed*100)/100,"m/s");
    
    pushToPebble(Name.toString(), Details.toString(), Temp.toString(), ApparentTemp.toString());
 }
@@ -68,7 +68,7 @@ function processWeatherDataSuccess(weatherDataUrl)
         
         if (response) {
            var weatherProviderUrl = window.localStorage.getItem('WeatherProvider');
-           if (weatherProviderUrl.contains('query.yahooapis.com'))
+           if (weatherProviderUrl.indexOf('query.yahooapis.com') != -1)
            {
               processYahooData(response);
            }
@@ -124,7 +124,7 @@ Pebble.addEventListener("showConfiguration", function() {
    
    var weatherProviderTag = 'openweather';
    var weatherProviderUrl = window.localStorage.getItem('WeatherProvider');
-   if (weatherProviderUrl.contains('query.yahooapis.com'))
+   if (weatherProviderUrl.indexOf('query.yahooapis.com') != -1)
    {
       weatherProviderTag = 'yahoo';
    }
