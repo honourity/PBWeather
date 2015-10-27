@@ -26,7 +26,7 @@
     "shortName": "Weather",
     "uuid": "6bfc632d-9ea9-46a4-bc69-f7e2df1fc080",
     "versionCode": 1,
-    "versionLabel": "1.5",
+    "versionLabel": "1.6",
     "watchapp": {
         "watchface": false
     }

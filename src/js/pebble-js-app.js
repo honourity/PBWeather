@@ -2,8 +2,8 @@ var initialized = false;
 
 var openWeatherURLString = 'http://api.openweathermap.org/data/2.5/weather?lat=|lat|&lon=|lon|&APPID=8ad8e7344dd24094a3cd4eef1afd0a89';
 
-window.localStorage.setItem('Fahrenheit', window.localStorage.getItem('Fahrenheit') ? window.localStorage.getItem('Fahrenheit') : 'false');
-window.localStorage.setItem('WeatherProvider', window.localStorage.getItem('WeatherProvider') ? window.localStorage.getItem('WeatherProvider') : openWeatherURLString);
+localStorage.setItem('Fahrenheit', localStorage.getItem('Fahrenheit') ? localStorage.getItem('Fahrenheit') : 'false');
+localStorage.setItem('WeatherProvider', localStorage.getItem('WeatherProvider') ? localStorage.getItem('WeatherProvider') : openWeatherURLString);
 
 function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
 {
@@ -17,7 +17,7 @@ function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
 
 function ConvertToReleventTemp(tempCelcius)
 {
-   if (window.localStorage.getItem('Fahrenheit') == 'true')
+   if (localStorage.getItem('Fahrenheit') == 'true')
    {
       return Math.round((tempCelcius*1.8)+32);
    }
@@ -30,7 +30,7 @@ function ConvertToReleventTemp(tempCelcius)
 function ConvertToReleventWindSpeedString(windMps)
 {
    
-   if (window.localStorage.getItem('Fahrenheit') == 'true')
+   if (localStorage.getItem('Fahrenheit') == 'true')
    {
       var mphWindSpeed = (windMps / 1609.344) * 3600;
       return (Math.round(mphWindSpeed*100)/100).toString().concat("mph");
@@ -83,7 +83,7 @@ function processWeatherDataSuccess(weatherDataUrl)
         var response = JSON.parse(request.responseText);
         
         if (response) {
-           var weatherProviderUrl = window.localStorage.getItem('WeatherProvider');
+           var weatherProviderUrl = localStorage.getItem('WeatherProvider');
            if (weatherProviderUrl.indexOf('query.yahooapis.com') != -1)
            {
               processYahooData(response);
@@ -97,9 +97,11 @@ function processWeatherDataSuccess(weatherDataUrl)
         }
       } else {
         console.log("status != 200");
+        processWeatherDataFailure("Weather API status != 200");
       }
     } else {
       console.log("Ready state != 4");
+      processWeatherDataFailure("Ready state != 4");
     }
   };
   request.send(null);
@@ -117,7 +119,7 @@ var locationOptions = {
 };
 function locationSuccess(pos)
 {
-   var weatherUrl = window.localStorage.getItem('WeatherProvider');
+   var weatherUrl = localStorage.getItem('WeatherProvider');
    weatherUrl = weatherUrl.replace('|lat|', pos.coords.latitude);
    weatherUrl = weatherUrl.replace('|lon|', pos.coords.longitude);
    processWeatherDataSuccess(weatherUrl);
@@ -139,7 +141,7 @@ Pebble.addEventListener("showConfiguration", function() {
   console.log("showing configuration");
    
    var weatherProviderTag = 'openweather';
-   var weatherProviderUrl = window.localStorage.getItem('WeatherProvider');
+   var weatherProviderUrl = localStorage.getItem('WeatherProvider');
    if (weatherProviderUrl.indexOf('query.yahooapis.com') != -1)
    {
       weatherProviderTag = 'yahoo';
@@ -150,7 +152,7 @@ Pebble.addEventListener("showConfiguration", function() {
       weatherProviderTag = 'openweather';
    }
    
-   var options = {'Fahrenheit':window.localStorage.getItem('Fahrenheit'), 'WeatherProvider':weatherProviderTag};
+   var options = {'Fahrenheit':localStorage.getItem('Fahrenheit'), 'WeatherProvider':weatherProviderTag};
    Pebble.openURL('http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfigPageLoader.html?'+encodeURIComponent(JSON.stringify(options)));
    console.log("urioptions " + encodeURIComponent(JSON.stringify(options)));
 });
@@ -158,18 +160,18 @@ Pebble.addEventListener("showConfiguration", function() {
 Pebble.addEventListener("webviewclosed", function(e) {
   console.log("configuration closed");
   if (e.response.charAt(0) == "{" && e.response.slice(-1) == "}" && e.response.length > 5) {
-    window.localStorage.setItem('Fahrenheit', JSON.parse(decodeURIComponent(e.response)).Fahrenheit);
+    localStorage.setItem('Fahrenheit', JSON.parse(decodeURIComponent(e.response)).Fahrenheit);
      
     switch(JSON.parse(decodeURIComponent(e.response)).WeatherProvider)
     {
        case 'yahoo':
           console.log("yahoo chosen");
-          window.localStorage.setItem('WeatherProvider', 'https://query.yahooapis.com/v1/public/yql?q=select%20location%2C%20wind%2C%20item.condition%2C%20atmosphere%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.placefinder%20where%20text%3D%22|lat|%2C|lon|%22%20and%20gflags%3D%22R%22)&format=json&diagnostics=true&callback=');
+          localStorage.setItem('WeatherProvider', 'https://query.yahooapis.com/v1/public/yql?q=select%20location%2C%20wind%2C%20item.condition%2C%20atmosphere%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.placefinder%20where%20text%3D%22|lat|%2C|lon|%22%20and%20gflags%3D%22R%22)&format=json&diagnostics=true&callback=');
           break;
        //put any new weather API's in here
        default:
           console.log("default chosen (openweather)");
-          window.localStorage.setItem('WeatherProvider', openWeatherURLString);
+          localStorage.setItem('WeatherProvider', openWeatherURLString);
     }
     
     navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
