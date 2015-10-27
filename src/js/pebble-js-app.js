@@ -1,7 +1,9 @@
 var initialized = false;
 
+var openWeatherURLString = 'http://api.openweathermap.org/data/2.5/weather?lat=|lat|&lon=|lon|&APPID=8ad8e7344dd24094a3cd4eef1afd0a89';
+
 window.localStorage.setItem('Fahrenheit', window.localStorage.getItem('Fahrenheit') ? window.localStorage.getItem('Fahrenheit') : 'false');
-window.localStorage.setItem('WeatherProvider', window.localStorage.getItem('WeatherProvider') ? window.localStorage.getItem('WeatherProvider') : 'http://api.openweathermap.org/data/2.5/weather?lat=|lat|&lon=|lon|');
+window.localStorage.setItem('WeatherProvider', window.localStorage.getItem('WeatherProvider') ? window.localStorage.getItem('WeatherProvider') : openWeatherURLString);
 
 function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
 {
@@ -25,6 +27,20 @@ function ConvertToReleventTemp(tempCelcius)
    }
 }
 
+function ConvertToReleventWindSpeedString(windMps)
+{
+   
+   if (window.localStorage.getItem('Fahrenheit') == 'true')
+   {
+      var mphWindSpeed = (windMps / 1609.344) * 3600;
+      return (Math.round(mphWindSpeed*100)/100).toString().concat("mph");
+   }
+   else
+   {
+      return (Math.round(windMps*100)/100).toString().concat("m/s");
+   }
+}
+
 function processYahooData(response)
 {
    var celsiusTemp = (response.query.results.channel.item.condition.temp - 32) * 5 / 9;
@@ -34,11 +50,11 @@ function processYahooData(response)
    var humidityMeasurement = response.query.results.channel.atmosphere.humidity;
 
    var Temp               = ConvertToReleventTemp(celsiusTemp);
-   var WindSpeed          = windMps;
+   var WindSpeed          = ConvertToReleventWindSpeedString(windMps);
    var Humidity           = humidityMeasurement;
    var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * (celsiusTemp)) / (237.7 + (celsiusTemp)));
-   var ApparentTemp       = ConvertToReleventTemp(((celsiusTemp) + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4));
-   var Details            = textDescription.concat("\nHumidity: ",Humidity,"%\nWind: ",Math.round(WindSpeed*100)/100,"m/s");
+   var ApparentTemp       = ConvertToReleventTemp(((celsiusTemp) + (0.33*WaterVaporPressure) - (0.7*windMps) - 4));
+   var Details            = textDescription.concat("\nHumidity: ",Humidity,"%\nWind: ",WindSpeed);
    
    pushToPebble(Name.toString(), Details.toString(), Temp.toString(), ApparentTemp.toString());
 }
@@ -46,11 +62,11 @@ function processOpenWeatherData(response)
 {
    var Name               = response.name;
    var Temp               = ConvertToReleventTemp(response.main.temp - 273.15);
-   var WindSpeed          = response.wind.speed;
+   var WindSpeed          = ConvertToReleventWindSpeedString(response.wind.speed);
    var Humidity           = response.main.humidity;
    var WaterVaporPressure = (Humidity / 100 ) * 6.105 * Math.exp((17.27 * (response.main.temp - 273.15)) / (237.7 + (response.main.temp - 273.15)));
-   var ApparentTemp       = ConvertToReleventTemp(((response.main.temp - 273.15) + (0.33*WaterVaporPressure) - (0.7*WindSpeed) - 4));
-   var Details            = response.weather[0].description.concat("\nHumidity: ",Humidity,"%\nWind: ",Math.round(WindSpeed*100)/100,"m/s");
+   var ApparentTemp       = ConvertToReleventTemp(((response.main.temp - 273.15) + (0.33*WaterVaporPressure) - (0.7*response.wind.speed) - 4));
+   var Details            = response.weather[0].description.concat("\nHumidity: ",Humidity,"%\nWind: ",WindSpeed);
    
    pushToPebble(Name.toString(), Details.toString(), Temp.toString(), ApparentTemp.toString());
 }
@@ -153,7 +169,7 @@ Pebble.addEventListener("webviewclosed", function(e) {
        //put any new weather API's in here
        default:
           console.log("default chosen (openweather)");
-          window.localStorage.setItem('WeatherProvider', 'http://api.openweathermap.org/data/2.5/weather?lat=|lat|&lon=|lon|');
+          window.localStorage.setItem('WeatherProvider', openWeatherURLString);
     }
     
     navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
