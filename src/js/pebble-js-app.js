@@ -35,10 +35,14 @@ function ConvertToReleventWindSpeedString(windMps)
       var mphWindSpeed = (windMps / 1609.344) * 3600;
       return (Math.round(mphWindSpeed*100)/100).toString().concat("mph");
    }
-   else if (localStorage.getItem('WindSpeedUnits') == 'kph')
+   else if (localStorage.getItem('WindSpeedUnits') == 'kmh')
    {
       var kphWindSpeed = (windMps * 3600)/1000;
       return (Math.round(kphWindSpeed*100)/100).toString().concat("km/h");
+   }
+   else if (localStorage.getItem('WindSpeedUnits') == 'mps')
+   {
+      return (Math.round(windMps*100)/100).toString().concat("m/s");
    }
    else
    {
