@@ -3,6 +3,7 @@ var initialized = false;
 var openWeatherURLString = 'http://api.openweathermap.org/data/2.5/weather?lat=|lat|&lon=|lon|&APPID=8ad8e7344dd24094a3cd4eef1afd0a89';
 
 localStorage.setItem('Fahrenheit', localStorage.getItem('Fahrenheit') ? localStorage.getItem('Fahrenheit') : 'false');
+localStorage.setItem('WindSpeedUnits', localStorage.getItem('WindSpeedUnits') ? localStorage.getItem('WindSpeedUnits') : 'mps');
 localStorage.setItem('WeatherProvider', localStorage.getItem('WeatherProvider') ? localStorage.getItem('WeatherProvider') : openWeatherURLString);
 
 function pushToPebble(KEY_LOCA, KEY_DESC, KEY_TEMP, KEY_APPT)
@@ -28,12 +29,16 @@ function ConvertToReleventTemp(tempCelcius)
 }
 
 function ConvertToReleventWindSpeedString(windMps)
-{
-   
-   if (localStorage.getItem('Fahrenheit') == 'true')
+{  
+   if (localStorage.getItem('WindSpeedUnits') == 'mph')
    {
       var mphWindSpeed = (windMps / 1609.344) * 3600;
       return (Math.round(mphWindSpeed*100)/100).toString().concat("mph");
+   }
+   else if (localStorage.getItem('WindSpeedUnits') == 'kph')
+   {
+      var kphWindSpeed = (windMps * 3600)/1000;
+      return (Math.round(kphWindSpeed*100)/100).toString().concat("km/h");
    }
    else
    {
@@ -152,7 +157,7 @@ Pebble.addEventListener("showConfiguration", function() {
       weatherProviderTag = 'openweather';
    }
    
-   var options = {'Fahrenheit':localStorage.getItem('Fahrenheit'), 'WeatherProvider':weatherProviderTag};
+   var options = {'Fahrenheit':localStorage.getItem('Fahrenheit'), 'WindSpeedUnits':localStorage.getItem('WindSpeedUnits'), 'WeatherProvider':weatherProviderTag};
    Pebble.openURL('http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfigPageLoader.html?'+encodeURIComponent(JSON.stringify(options)));
    console.log("urioptions " + encodeURIComponent(JSON.stringify(options)));
 });
@@ -161,7 +166,8 @@ Pebble.addEventListener("webviewclosed", function(e) {
   console.log("configuration closed");
   if (e.response.charAt(0) == "{" && e.response.slice(-1) == "}" && e.response.length > 5) {
     localStorage.setItem('Fahrenheit', JSON.parse(decodeURIComponent(e.response)).Fahrenheit);
-     
+    localStorage.setItem('WindSpeedUnits', JSON.parse(decodeURIComponent(e.response)).WindSpeedUnits);
+    
     switch(JSON.parse(decodeURIComponent(e.response)).WeatherProvider)
     {
        case 'yahoo':
