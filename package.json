@@ -1,0 +1,42 @@
+{
+    "author": "pebble@honourity.com",
+    "dependencies": {},
+    "keywords": [],
+    "name": "weather",
+    "pebble": {
+        "capabilities": [
+            "location",
+            "configurable"
+        ],
+        "displayName": "Weather",
+        "enableMultiJS": false,
+        "messageKeys": {
+            "KEY_APPT": 3,
+            "KEY_DESC": 1,
+            "KEY_LOCA": 0,
+            "KEY_TEMP": 2
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/weather_icon_small_tiny_app.png",
+                    "menuIcon": true,
+                    "name": "APP_LOGO",
+                    "type": "png"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "diorite"
+        ],
+        "uuid": "6bfc632d-9ea9-46a4-bc69-f7e2df1fc080",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.8.0"
+}
