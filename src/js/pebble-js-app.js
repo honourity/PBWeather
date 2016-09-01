@@ -162,7 +162,7 @@ Pebble.addEventListener("showConfiguration", function() {
    }
    
    var options = {'Fahrenheit':localStorage.getItem('Fahrenheit'), 'WindSpeedUnits':localStorage.getItem('WindSpeedUnits'), 'WeatherProvider':weatherProviderTag};
-   Pebble.openURL('http://rawgit.com/jtcgreyfox/PBWeather/master/Config/pebbleConfigPageLoader.html?'+encodeURIComponent(JSON.stringify(options)));
+   Pebble.openURL('http://rawgit.com/honourity/PBWeather/master/Config/pebbleConfigPageLoader.html?'+encodeURIComponent(JSON.stringify(options)));
    console.log("urioptions " + encodeURIComponent(JSON.stringify(options)));
 });
 
